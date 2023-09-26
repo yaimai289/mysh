@@ -1,0 +1,4 @@
+import os
+
+SHELL_STATUS_RUN = 0
+SHELL_STATUS_STOP = 1
