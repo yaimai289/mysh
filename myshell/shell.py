@@ -3,7 +3,7 @@ import sys
 import shlex
 # 导入常量
 from myshell.constants import *
-from myshell.builtins import *
+from myshell.sh_builtins import *
 
 # 哈希映射存储内建函数名及引用
 built_in_cmds = {}
