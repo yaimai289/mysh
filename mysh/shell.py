@@ -87,6 +87,7 @@ def init():
     register_builtin_cmds("cd", cd)
     register_builtin_cmds("exit", exit)
     register_builtin_cmds("alias", alias)
+    register_builtin_cmds("which", which)
 
 
 def main():
