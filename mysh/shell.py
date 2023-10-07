@@ -27,18 +27,18 @@ def execute(cmd_token):
 
     ### 若为外部命令
     else :
-        pid = os.fork()     ### 创建子进程
+        pid = os.fork()  ### 创建子进程
 
         ### 当前进程为子进程
         if pid == 0:
-            os.execvp(cmd_token[0], cmd_token)     ### 替换进程
+            os.execvp(cmd_token[0], cmd_token)  ### 替换进程
 
         ### 当前进程为父进程
         elif pid > 0:
             while True:
-                status = os.waitpid([pid, 0])     ### 等待子进程
+                _, status = os.waitpid([pid, 0])  ### 等待子进程
                 if os.WIFEXITED(status) or os.WIFSIGNALED(status):
-                    break     ### 子进程正常或异常终止，退出等待
+                    break  ### 子进程正常或异常终止，退出等待
 
         ### 进程错误
         elif pid < 0:
@@ -71,6 +71,7 @@ def register_builtin_cmds(name, func):
 ### 注册内置函数库
 def init():
     register_builtin_cmds("cd", cd)
+    register_builtin_cmds("exit", exit)
 
 
 def main():
