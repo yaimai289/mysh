@@ -1,26 +1,36 @@
 import os
+import sys
 from mysh.constants import *
+from mysh.shell import builtin_cmd
 
-def which(command):
-
+def which(args):
+    command = str(args[0])
+    
     ### 创建路径列表
     result = []
 
-    ### 获取环境变量作为查找路径
-    path = os.environ.get('PATH', '').split(os.pathsep)
+    ### 若为自建函数
+    if command in builtin_cmd:
+        result.append(f'/home/yw/mysh/mysh/builtin/{command}')
 
-    ### 分割路径并与命令名拼接
-    for p in path:
-        command_path = os.path.join(p, str(command))
-        ### 判断路径类型及访问权限
-        if os.path.isfile(command_path) and os.access(command_path, os.X_OK):
+    # 获取环境变量及系统路径作为查找路径
+    sys_path = [f'{sys.prefix}/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin']
+    environ_path = os.environ.get('PATH', '').strip().split(os.pathsep)
+    search_path = list(set(sys_path + environ_path))
+
+    # 分割路径并与命令名拼接
+    for p in search_path:
+        command_path = os.path.join(p, command)
+        # 判断是否为可执行文件
+        is_execute = os.access(command_path, os.X_OK)
+        if is_execute:
             result.append(command_path)
 
-    ### 若路径列表不为空
-    if len (result) > 0:
+    # 若路径列表不为空
+    if result:
         print('\n'.join(result))
-    ### 若路径列表为空
+    # 若路径列表为空
     else:
-        print(f"\033[31mCommand: {command} not found in PATH or no access to\033[0m")
+        print(f"\033[31mCommand: \033[36m{command[0]} \033[31mnot found in PATH or no access to\033[0m")
 
     return SHELL_STATUS_RUN

@@ -19,7 +19,7 @@ def alias(args):
         if alias_name in aliased_cmd:
             print(f"{alias_name} = {aliased_cmd[alias_name]}")
         else :
-            print(f"\033[31mNo such alias: {alias_name}\033[0m")
+            print(f"\033[31mNo such alias: \033[32m{alias_name}\033[0m")
 
     elif len(alias_args) == 2:
     ### 分割别名与函数

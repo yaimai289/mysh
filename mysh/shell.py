@@ -2,16 +2,22 @@ import os
 import sys
 import shlex
 import subprocess
+import socket
+import getpass
 
 ### 设置环境变量
 sys.path.append('/home/yw/mysh')
+
+### 创建自建函数列表
+builtin_cmd = ['cd', 'exit', 'alias', 'which']
+
 
 from mysh.constants import *   ### 导入常量
 from mysh.builtin import *   ### 导入内置函数
 from mysh.builtin.alias import aliased_cmd   ### 导入别名字典
 
 ### 创建内建函数字典
-builtin_cmds = {}
+commands = {}
 
 ### 分割参数
 def tokenize(string):
@@ -24,8 +30,8 @@ def execute(cmd_token):
     cmd_args = cmd_token[1:]
 
     ### 若为内置命令则直接执行
-    if cmd_name in builtin_cmds :
-        return builtin_cmds[cmd_name](cmd_args)
+    if cmd_name in commands :
+        return commands[cmd_name](cmd_args)
 
     ### 根据别名执行命令
     if cmd_name in aliased_cmd :
@@ -56,7 +62,7 @@ def shell_loop():
     while True:
 
         ### 显示命令提示符
-        sys.stdout.write("{}{}  ".format(">>> ", os.getcwd() ))
+        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()} \033[1;34m{os.getcwd()}  \033[0;0m')
         sys.stdout.flush()
 
         ### 读取外部命令
@@ -77,17 +83,17 @@ def shell_loop():
             break
 
 
-def register_builtin_cmds(name, func):
-    builtin_cmds[name] = func
+def register_commands(name, func):
+    commands[name] = func
 
 
 
 ### 注册内置函数库
 def init():
-    register_builtin_cmds("cd", cd)
-    register_builtin_cmds("exit", exit)
-    register_builtin_cmds("alias", alias)
-    register_builtin_cmds("which", which)
+    register_commands("cd", cd)
+    register_commands("exit", exit)
+    register_commands("alias", alias)
+    register_commands("which", which)
 
 
 def main():
