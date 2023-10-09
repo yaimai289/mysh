@@ -10,7 +10,7 @@ def cd(args):
         ### 报错
         if not dest:
             print("\033[31mOLDPWD not set\033[0m")
-            return SHELL_STATUS_RUN
+            return SHELL_STATUS_RUN 
     else :
         ### 将输入转化成绝对路径
         dest = os.path.expanduser(path)

@@ -7,10 +7,10 @@ import getpass
 
 ### 设置环境变量
 sys.path.append('/home/yw/mysh')
+HISTORY_FILE = os.path.expanduser('~/mysh_history')
 
 ### 创建自建函数列表
 builtin_cmd = ['cd', 'exit', 'alias', 'which']
-
 
 from mysh.constants import *   ### 导入常量
 from mysh.builtin import *   ### 导入内置函数
@@ -71,6 +71,9 @@ def shell_loop():
         ### 切分命令
         cmd_token = tokenize(cmd)
 
+        ### 保存命令到历史记录中
+        save_history(cmd_token)
+
         ### 测试
         print('executing command:', cmd_token)
         print('command args:',cmd_token[1:])
@@ -94,6 +97,7 @@ def init():
     register_commands("exit", exit)
     register_commands("alias", alias)
     register_commands("which", which)
+    register_commands("history", history)
 
 
 def main():
