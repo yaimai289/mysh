@@ -1,7 +1,7 @@
 import os
 import sys
 from mysh.constants import *
-from mysh.shell import builtin_cmd
+from mysh.shell import builtin_commands
 
 def which(args):
     command = str(args[0])
@@ -10,7 +10,7 @@ def which(args):
     result = []
 
     ### 若为自建函数
-    if command in builtin_cmd:
+    if command in builtin_commands:
         result.append(f'/home/yw/mysh/mysh/builtin/{command}')
 
     # 获取环境变量及系统路径作为查找路径
@@ -28,7 +28,7 @@ def which(args):
 
     # 若路径列表不为空
     if result:
-        print('\n'.join(result))
+        print(''.join(result))
     # 若路径列表为空
     else:
         print(f"\033[31mCommand: \033[36m{command[0]} \033[31mnot found in PATH or no access to\033[0m")
