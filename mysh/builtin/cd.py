@@ -7,6 +7,7 @@ def cd(args):
     ### 切换到最近工作目录
     if path == "-":
         dest = os.environ.get('OLDPWD', "")
+        print(f'{os.getcwd}')
         ### 报错
         if not dest:
             print("\033[31mOLDPWD not set\033[0m")

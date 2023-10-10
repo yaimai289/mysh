@@ -6,3 +6,4 @@ from mysh.builtin.history import history, save_history
 from mysh.builtin.ehco import echo
 from mysh.builtin.pwd import pwd
 from mysh.builtin.solve_home_dir import solve_home_dir
+from mysh.builtin.type import type

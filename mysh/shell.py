@@ -22,8 +22,8 @@ with open(HISTORY_FILE, "a") as f:
 
 
 ### 创建函数字典
-buitin_commands = {}
-
+    builtin_commands = {}
+    external_commands = []
 
 ### 分割参数
 def tokenize(string):
@@ -39,9 +39,13 @@ def execute(cmd_token):
     cmd_name = cmd_token[0]
     cmd_args = cmd_token[1:]
 
+    ### 执行查询类型命令
+    if cmd_name == 'type':
+        return type(cmd_args, builtin_commands, external_commands)
+
     ### 若为内置命令则直接执行
-    if cmd_name in buitin_commands :
-        return buitin_commands[cmd_name](cmd_args)
+    if cmd_name in builtin_commands :
+        return builtin_commands[cmd_name](cmd_args)
 
     ### 根据别名执行命令
     if cmd_name in aliased_cmd :
@@ -49,8 +53,8 @@ def execute(cmd_token):
         alias_cmd_token = alias_cmd + cmd_args
         return execute(alias_cmd_token)
 
-    '''### 若为外部命令
-    else :
+    ### 若为外部命令
+    '''else :
         try:
             result = subprocess.run(cmd_token, capture_output=True, text=True)
             ### 若有标准输出
@@ -93,37 +97,51 @@ def shell_loop():
             break
 
 
-def register_commands(name, func):
-    buitin_commands[name] = func
+def register_builtin_commands(name, func):
+    builtin_commands[name] = func
 
 
-'''def register_system_command():
-    try:
-        result = subprocess.run('compgen-c', capture_output=True, text=True, shell=True)
-        commands = result.stdout.strip().split('\n')
+def get_all_commands():
+    all_commands = []
+    ### 设置查找路径
+    sys_path = [f'{sys.prefix}/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin']
+    for path in sys_path:
+        try:
+            ### 遍历路径判断是否为非空名文件
+            with os.scandir(path) as entries:
+                for entry in entries:
+                    if entry.is_file and entry.name != '':
+                        all_commands.append(entry.name)
+        except FileNotFoundError:
+            continue
+    return all_commands
 
-        ### 若不在自建函数中
-        for command in commands:
-            if command not in usable_commands:
-                register_commands(command, execute)
-    except Exception as e:
-        print(f'\033[31mError in register system command: \033[33m{e}\033[0m')'''
+def register_external_command(builtin_commands, external_commands):
+    all_commands = get_all_commands()
+    external_commands.clear()
 
-### 注册内置函数库
+    ### 若不在自建函数中注册到外部命令列表中
+    for command in all_commands:
+        if command not in builtin_commands and command not in external_commands:
+            external_commands.append(command)
+    return external_commands
+
+
+### 注册函数库
 def init():
-    register_commands("cd", cd)
-    register_commands("exit", exit)
-    register_commands("alias", alias)
-    register_commands("which", which)
-    register_commands("history", history)
-    register_commands("echo", echo)
-    register_commands("pwd", pwd)
+    register_builtin_commands("cd", cd)
+    register_builtin_commands("exit", exit)
+    register_builtin_commands("alias", alias)
+    register_builtin_commands("which", which)
+    register_builtin_commands("history", history)
+    register_builtin_commands("echo", echo)
+    register_builtin_commands("pwd", pwd)
+    register_builtin_commands("type", type)
+    register_external_command(builtin_commands, external_commands)
 
 
 def main():
     init()
-    print(f'buitin_commands: {buitin_commands}')
-    ###register_system_command()
     shell_loop()
 
 if __name__ == "__main__":
