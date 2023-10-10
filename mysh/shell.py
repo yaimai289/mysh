@@ -22,7 +22,7 @@ with open(HISTORY_FILE, "a") as f:
 
 
 ### 创建自建函数列表
-builtin_commands = ['cd', 'exit', 'alias', 'which', 'history']
+builtin_commands = ['cd', 'exit', 'alias', 'which', 'history', 'echo']
 
 
 ### 创建函数字典
@@ -120,6 +120,7 @@ def init():
     register_commands("alias", alias)
     register_commands("which", which)
     register_commands("history", history)
+    register_commands("echo", echo)
 
 
 def main():
