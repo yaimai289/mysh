@@ -72,7 +72,7 @@ def shell_loop():
     while True:
 
         ### 显示命令提示符
-        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()} \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
+        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}\033[0;0m: \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
         sys.stdout.flush()
 
         ### 读取输入命令
