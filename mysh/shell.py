@@ -21,12 +21,8 @@ with open(HISTORY_FILE, "a") as f:
     pass
 
 
-### 创建自建函数列表
-builtin_commands = ['cd', 'exit', 'alias', 'which', 'history', 'echo']
-
-
 ### 创建函数字典
-usable_commands = {}
+buitin_commands = {}
 
 
 ### 分割参数
@@ -44,8 +40,8 @@ def execute(cmd_token):
     cmd_args = cmd_token[1:]
 
     ### 若为内置命令则直接执行
-    if cmd_name in usable_commands :
-        return usable_commands[cmd_name](cmd_args)
+    if cmd_name in buitin_commands :
+        return buitin_commands[cmd_name](cmd_args)
 
     ### 根据别名执行命令
     if cmd_name in aliased_cmd :
@@ -53,7 +49,7 @@ def execute(cmd_token):
         alias_cmd_token = alias_cmd + cmd_args
         return execute(alias_cmd_token)
 
-    ### 若为外部命令
+    '''### 若为外部命令
     else :
         try:
             result = subprocess.run(cmd_token, capture_output=True, text=True)
@@ -68,7 +64,7 @@ def execute(cmd_token):
         except FileNotFoundError:
             print(f"\033[31mCommand not found: {cmd_name}\033[0m")
         except Exception as e:
-            print(f"\033[31mError in executing: {e}[0m")
+            print(f"\033[31mError in executing: {e}[0m")'''
     return SHELL_STATUS_RUN
 
 
@@ -76,7 +72,7 @@ def shell_loop():
     while True:
 
         ### 显示命令提示符
-        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()} \033[1;34m{os.getcwd()}  \033[0;0m')
+        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()} \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
         sys.stdout.flush()
 
         ### 读取输入命令
@@ -98,7 +94,7 @@ def shell_loop():
 
 
 def register_commands(name, func):
-    usable_commands[name] = func
+    buitin_commands[name] = func
 
 
 '''def register_system_command():
@@ -121,11 +117,13 @@ def init():
     register_commands("which", which)
     register_commands("history", history)
     register_commands("echo", echo)
+    register_commands("pwd", pwd)
 
 
 def main():
     init()
-###    register_system_command()
+    print(f'buitin_commands: {buitin_commands}')
+    ###register_system_command()
     shell_loop()
 
 if __name__ == "__main__":

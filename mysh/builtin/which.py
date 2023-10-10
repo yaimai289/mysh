@@ -1,7 +1,7 @@
 import os
 import sys
 from mysh.constants import *
-from mysh.shell import builtin_commands
+from mysh.shell import buitin_commands
 
 def which(args):
     command = str(args[0])
@@ -10,7 +10,7 @@ def which(args):
     result = []
 
     ### 若为自建函数
-    if command in builtin_commands:
+    if command in buitin_commands:
         result.append(f'/home/yw/mysh/mysh/builtin/{command}')
 
     # 获取环境变量及系统路径作为查找路径
