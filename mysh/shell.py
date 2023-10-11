@@ -4,7 +4,6 @@ import shlex
 import subprocess
 import socket
 import getpass
-import readline
 
 
 ### 设置环境变量
@@ -140,6 +139,7 @@ def init():
     register_builtin_commands("pwd", pwd)
     register_builtin_commands("type", type)
     register_builtin_commands("export", export)
+    register_builtin_commands("unset", unset)
     register_external_command(builtin_commands, external_commands)
 
 
@@ -152,4 +152,4 @@ if __name__ == "__main__":
 
 
 
-    ### 光标移动， 进度条, 声音
+    ### 光标移动， 进度条, 声音, 永久别名
