@@ -24,7 +24,10 @@ def cd(args):
         working_dir = os.getcwd()
         os.putenv("PWD", working_dir)
 
+    ### 错误反馈
     except FileNotFoundError:
         print(f'\033[31mNot found \033[33m{path}\00[0m')
+    except Exception as e:
+        print(f'\033[31mError in cd: \033[33m{e}\033[0m')
 
     return SHELL_STATUS_RUN

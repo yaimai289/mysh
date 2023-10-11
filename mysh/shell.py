@@ -25,6 +25,11 @@ with open(HISTORY_FILE, "a") as f:
     builtin_commands = {}
     external_commands = []
 
+
+### 创建变量字典
+variable = {}
+
+
 ### 分割参数
 def tokenize(string):
     return shlex.split(string)
@@ -39,22 +44,32 @@ def execute(cmd_token):
     cmd_name = cmd_token[0]
     cmd_args = cmd_token[1:]
 
+    print(cmd_token)
+
+    ### 判断是否为赋值函数
+    status = assign(cmd_token, variable, builtin_commands, external_commands)
+
+    print(variable)
+
+    if status != SHELL_STATUS_RUN:
+        pass
+
     ### 执行查询类型命令
-    if cmd_name == 'type':
+    elif cmd_name == 'type':
         return type(cmd_args, builtin_commands, external_commands)
 
     ### 若为内置命令则直接执行
-    if cmd_name in builtin_commands :
+    elif cmd_name in builtin_commands :
         return builtin_commands[cmd_name](cmd_args)
 
     ### 根据别名执行命令
-    if cmd_name in aliased_cmd :
+    elif cmd_name in aliased_cmd :
         alias_cmd = tokenize(aliased_cmd[cmd_name])
         alias_cmd_token = alias_cmd + cmd_args
         return execute(alias_cmd_token)
 
     ### 若为外部命令
-    '''else :
+    else :
         try:
             result = subprocess.run(cmd_token, capture_output=True, text=True)
             ### 若有标准输出
@@ -68,7 +83,7 @@ def execute(cmd_token):
         except FileNotFoundError:
             print(f"\033[31mCommand not found: {cmd_name}\033[0m")
         except Exception as e:
-            print(f"\033[31mError in executing: {e}[0m")'''
+            print(f"\033[31mError in executing: {e}[0m")
     return SHELL_STATUS_RUN
 
 
@@ -152,4 +167,4 @@ if __name__ == "__main__":
 
 
 
-    ### 光标移动， 进度条, 声音, 永久别名
+    ### 光标移动， 进度条, 声音, 永久别名, 赋值
