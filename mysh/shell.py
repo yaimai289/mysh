@@ -4,6 +4,7 @@ import shlex
 import subprocess
 import socket
 import getpass
+import readline
 
 
 ### 设置环境变量
@@ -76,8 +77,8 @@ def shell_loop():
     while True:
 
         ### 显示命令提示符
-        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}'
-                         f'@{socket.gethostname()}\033[0;0m: \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
+        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}'
+                         f'\033[0;0m: \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
         sys.stdout.flush()
 
         ### 读取输入命令
@@ -138,6 +139,7 @@ def init():
     register_builtin_commands("echo", echo)
     register_builtin_commands("pwd", pwd)
     register_builtin_commands("type", type)
+    register_builtin_commands("export", export)
     register_external_command(builtin_commands, external_commands)
 
 
@@ -147,3 +149,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+    ### 光标移动， 进度条, 声音
