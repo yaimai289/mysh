@@ -1,7 +1,7 @@
 import os
 from mysh.constants import *
 
-def cd(args):
+def cd(args, **kw):
     path = args[0] if len(args) > 0 else "~"   ### 若无参数默认参数为~
 
     try:

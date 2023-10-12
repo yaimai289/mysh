@@ -3,7 +3,7 @@ import sys
 from mysh.constants import *
 from mysh.shell import builtin_commands
 
-def which(args):
+def which(args, **kw):
     command = str(args[0])
     
     ### 创建路径列表

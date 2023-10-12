@@ -2,7 +2,7 @@ import os
 from mysh.constants import *
 
 
-def pwd(args):
+def pwd(args, **kw):
     ### 打印目录
     try:
         print(f'{os.getcwd()}\033')

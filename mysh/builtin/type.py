@@ -1,7 +1,7 @@
 from mysh.constants import *
 
 
-def type(args, builtin_commands, external_commands):
+def type(args, *, builtin_commands, external_commands, **kw):
     ### 参数不符合格式
     if len(args) != 1:
         print(f'\033[31mInvalid arguments\nUsage: type <command_name>\033[0m')

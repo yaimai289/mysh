@@ -1,10 +1,7 @@
 from mysh.constants import *
 
 
-### 创建别名函数字典
-aliased_cmd = {}
-
-def alias(args):
+def alias(args, aliased_cmd, **kw):
     if not args:
         ### 若无参数列出所有别名
         for alias_name, command_name in aliased_cmd.items():
@@ -12,7 +9,6 @@ def alias(args):
         return SHELL_STATUS_RUN
 
     alias_args = ' '.join(args).split('=')
-    print(alias_args)
     
     if len(alias_args) == 1:
         ### 若参数为一个列出别名或命令
@@ -36,7 +32,5 @@ def alias(args):
     ### 输入命令不符合格式报错
     else:
         print("\033[31mUsage: alias <alias_name> = <command_name>\033[0m")
-    
-    print(aliased_cmd)
 
-    return SHELL_STATUS_RUN
+    return aliased_cmd

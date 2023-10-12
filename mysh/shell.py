@@ -12,7 +12,6 @@ sys.path.append('/home/yw/mysh')
 
 from mysh.constants import *   ### 导入常量
 from mysh.builtin import *   ### 导入内置函数
-from mysh.builtin.alias import aliased_cmd   ### 导入别名字典
 
 
 ### 设置路径并创建历史记录文件
@@ -24,6 +23,7 @@ with open(HISTORY_FILE, "a") as f:
 ### 创建函数字典
     builtin_commands = {}
     external_commands = []
+    aliased_cmd = {}
 
 
 ### 创建变量字典
@@ -40,28 +40,28 @@ def execute(cmd_token):
     ### 保存命令到历史记录中
     save_history(cmd_token)
 
-    ### 拆分命令名与参数
-    cmd_name = cmd_token[0]
-    cmd_args = cmd_token[1:]
-
-    print(cmd_token)
+    print(f'cmd_token: {cmd_token}')
 
     ### 判断是否为赋值函数
     status = assign(cmd_token, variable, builtin_commands, external_commands)
 
-    print(variable)
+    ### 判断是否存在变量引用
+    var_ref(cmd_token, variable)
 
-    if status != SHELL_STATUS_RUN:
+        ### 拆分命令名与参数
+    cmd_name = cmd_token[0]
+    cmd_args = cmd_token[1:]
+
+    print(f'status: {status}')
+
+    if status == SHELL_STATUS_RUN:
         pass
-
-    ### 执行查询类型命令
-    elif cmd_name == 'type':
-        return type(cmd_args, builtin_commands, external_commands)
 
     ### 若为内置命令则直接执行
     elif cmd_name in builtin_commands :
-        return builtin_commands[cmd_name](cmd_args)
-
+        return builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
+                                          external_commands=external_commands, aliased_cmd=aliased_cmd)
+    
     ### 根据别名执行命令
     elif cmd_name in aliased_cmd :
         alias_cmd = tokenize(aliased_cmd[cmd_name])
@@ -167,4 +167,4 @@ if __name__ == "__main__":
 
 
 
-    ### 光标移动， 进度条, 声音, 永久别名, 赋值
+    ### 光标移动, 换行， 进度条, 声音, 永久别名, 函数赋值

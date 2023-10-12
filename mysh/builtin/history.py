@@ -1,6 +1,6 @@
 from mysh.shell import HISTORY_FILE
 
-def history(args):
+def history(args, **kw):
     try:
         ### 获取历史命令列表
         with open(HISTORY_FILE, "r") as f:

@@ -1,5 +1,5 @@
 from mysh.constants import *
 
 
-def exit(args):
+def exit(args, **kw):
     return SHELL_STATUS_STOP
