@@ -11,3 +11,5 @@ from mysh.builtin.export import export
 from mysh.builtin.unset import unset
 from mysh.builtin.assign import assign
 from mysh.builtin.var_ref import var_ref
+from mysh.builtin.kill import kill
+### from mysh.builtin.readline_input import readline_input

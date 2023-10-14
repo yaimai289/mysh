@@ -5,7 +5,8 @@ import readline
 import subprocess
 import socket
 import getpass
-import atexit
+import signal
+import psutil
 
 
 ### 设置环境变量
@@ -29,6 +30,21 @@ builtin_commands = {}
 external_commands = []
 aliased_cmd = {}
 variable = {}
+
+### 信号处理
+def sigint(signal, frame):
+    exit(0)
+signal.signal(signal.SIGINT, sigint)
+
+def sigterm(signal ,frame):
+    processes = psutil.process_iter(['pid', 'name'])
+    for p in processes:
+        pid = p.info['pid']
+        if pid == 0:
+            continue
+        os.kill(pid, 15)
+    exit(0)
+signal.signal(signal.SIGTERM, sigterm)
 
 
 ### 分割参数
@@ -96,11 +112,14 @@ def shell_loop():
                          f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
         sys.stdout.flush()
 
-        '''### 读取输入命令
-        input_cmd = sys.stdin.readline()'''
-
         ### 读取输入命令
+        input_cmd = sys.stdin.readline()
 
+        '''### 读取输入命令
+        input_cmd = readline_input()'''
+
+        ### 保存命令历史
+        save_history(cmd_token)
 
         ### 切分命令
         cmd_token = tokenize(input_cmd)
@@ -109,8 +128,6 @@ def shell_loop():
         print('executing command:', cmd_token)
         print('command args:',cmd_token[1:])
 
-        ### 保存命令历史
-        atexit.register(save_history)
 
         ### 执行命令并获取新状态
         status = execute(cmd_token)
