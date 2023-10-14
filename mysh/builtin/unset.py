@@ -1,8 +1,7 @@
 from mysh.constants import *
-from mysh.builtin.alias import aliased_cmd
 
 
-def unset(args, *, variable, **kw):
+def unset(args, *, variable, aliased_cmd, **kw):
 
     ### 判断格式是否正确
     if len(args) == 1 or 2:

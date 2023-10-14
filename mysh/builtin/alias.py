@@ -1,7 +1,7 @@
 from mysh.constants import *
 
 
-def alias(args, aliased_cmd, **kw):
+def alias(args, *, aliased_cmd, **kw):
     if not args:
         ### 若无参数列出所有别名
         for alias_name, command_name in aliased_cmd.items():

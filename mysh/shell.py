@@ -1,9 +1,11 @@
 import os
 import sys
 import shlex
+import readline
 import subprocess
 import socket
 import getpass
+import atexit
 
 
 ### 设置环境变量
@@ -18,15 +20,14 @@ from mysh.builtin import *   ### 导入内置函数
 HISTORY_FILE = os.path.expanduser('~/mysh_history')
 with open(HISTORY_FILE, "a") as f:
     pass
+readline.read_history_file(HISTORY_FILE)
+readline.set_history_length(500)
 
 
-### 创建函数字典
-    builtin_commands = {}
-    external_commands = []
-    aliased_cmd = {}
-
-
-### 创建变量字典
+### 创建字典
+builtin_commands = {}
+external_commands = []
+aliased_cmd = {}
 variable = {}
 
 
@@ -37,18 +38,18 @@ def tokenize(string):
 
 def execute(cmd_token):
 
-    ### 保存命令到历史记录中
-    save_history(cmd_token)
-
+    ### 测试
     print(f'cmd_token: {cmd_token}')
+    print(f'buintin: {builtin_commands}')
 
     ### 判断是否为赋值函数
-    status = assign(cmd_token, variable, builtin_commands, external_commands)
+    _, status = assign(cmd_token, variable)
 
     ### 判断是否存在变量引用
-    var_ref(cmd_token, variable)
+    if status != SHELL_STATUS_RUN:
+        cmd_token, status = var_ref(cmd_token, variable)
 
-        ### 拆分命令名与参数
+    ### 拆分命令名与参数
     cmd_name = cmd_token[0]
     cmd_args = cmd_token[1:]
 
@@ -92,11 +93,14 @@ def shell_loop():
 
         ### 显示命令提示符
         sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}'
-                         f'\033[0;0m: \033[1;34m{solve_home_dir(os.getcwd())}  \033[0;0m')
+                         f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
         sys.stdout.flush()
 
+        '''### 读取输入命令
+        input_cmd = sys.stdin.readline()'''
+
         ### 读取输入命令
-        input_cmd = sys.stdin.readline()
+
 
         ### 切分命令
         cmd_token = tokenize(input_cmd)
@@ -104,6 +108,9 @@ def shell_loop():
         ### 测试
         print('executing command:', cmd_token)
         print('command args:',cmd_token[1:])
+
+        ### 保存命令历史
+        atexit.register(save_history)
 
         ### 执行命令并获取新状态
         status = execute(cmd_token)
