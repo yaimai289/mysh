@@ -39,7 +39,6 @@ def execute(cmd_token):
 
     ### 测试
     print(f'cmd_token: {cmd_token}')
-    print(f'buintin: {builtin_commands}')
 
     ### 获取所有进程pid
     pids = pids_register()
@@ -59,6 +58,18 @@ def execute(cmd_token):
 
     if status == SHELL_STATUS_RUN:
         pass
+
+    ### 执行后台命令
+    elif cmd_token[-1] == '&':
+        if len(cmd_token) != 1:
+            cmd = ' '.join(cmd_token)
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            print(stdout)
+            if proc.returncode != 0:
+                print(f'\033[31mError in background process: \033[33m{stderr}\033[0m')
+        else:
+            return
 
     ### 若为内置命令则直接执行
     elif cmd_name in builtin_commands :
