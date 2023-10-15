@@ -3,6 +3,7 @@ import sys
 import shlex
 import readline
 import subprocess
+import time
 import socket
 import getpass
 import signal
@@ -41,7 +42,7 @@ def execute(cmd_token):
     print(f'buintin: {builtin_commands}')
 
     ### 获取所有进程pid
-    pids = pids_register(pids)
+    pids = pids_register()
 
     ### 判断是否为赋值函数
     _, status = assign(cmd_token, variable)
@@ -97,6 +98,8 @@ def shell_loop():
                          f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
         sys.stdout.flush()
 
+        pids_register()
+
         ### 读取输入命令
         input_cmd = sys.stdin.readline()
 
@@ -106,16 +109,27 @@ def shell_loop():
         ### 切分命令
         cmd_token = tokenize(input_cmd)
 
-        ### 保存命令历史
-        save_history(cmd_token)
+        ### 判断是否输入为空值
+        if cmd_token:
 
-        ### 测试
-        print('executing command:', cmd_token)
-        print('command args:',cmd_token[1:])
+            ### 保存命令历史
+            save_history(cmd_token)
 
+            ### 测试
+            print('executing command:', cmd_token)
+            print('command args:',cmd_token[1:])
 
-        ### 执行命令并获取新状态
-        status = execute(cmd_token)
+            ### 缓冲
+            time.sleep(0.01)
+
+            ### 执行命令并获取新状态
+            status = execute(cmd_token)
+
+        else:
+            status = SHELL_STATUS_RUN
+
+        ### 缓冲
+        time.sleep(0.01)
 
         ### 检查是否为停止状态
         if status == SHELL_STATUS_STOP:
@@ -153,7 +167,7 @@ def register_external_command(builtin_commands, external_commands):
 
 
 ### 获取所有进程pid
-def pids_register(pids):
+def pids_register():
     processes = psutil.process_iter(['pid', 'name'])
     for p in processes:
         pids[p.info['pid']] = p.info['name']
@@ -179,7 +193,7 @@ def init():
 pids_register()
 
 def sigint(signal, frame):
-    print('')
+    print('\033[33m\033[Process interrupted\033[0m')
     sys.exit(0)
 signal.signal(signal.SIGINT, sigint)
 
