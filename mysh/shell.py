@@ -21,31 +21,13 @@ from mysh.builtin import *   ### 导入内置函数
 HISTORY_FILE = os.path.expanduser('~/mysh_history')
 with open(HISTORY_FILE, "a") as f:
     pass
-readline.read_history_file(HISTORY_FILE)
-readline.set_history_length(500)
-
 
 ### 创建字典
 builtin_commands = {}
 external_commands = []
 aliased_cmd = {}
 variable = {}
-
-### 信号处理
-def sigint(signal, frame):
-    exit(0)
-signal.signal(signal.SIGINT, sigint)
-
-def sigterm(signal ,frame):
-    processes = psutil.process_iter(['pid', 'name'])
-    for p in processes:
-        pid = p.info['pid']
-        if pid == 0:
-            continue
-        os.kill(pid, 15)
-    exit(0)
-signal.signal(signal.SIGTERM, sigterm)
-
+pids ={}
 
 ### 分割参数
 def tokenize(string):
@@ -57,6 +39,9 @@ def execute(cmd_token):
     ### 测试
     print(f'cmd_token: {cmd_token}')
     print(f'buintin: {builtin_commands}')
+
+    ### 获取所有进程pid
+    pids = pids_register(pids)
 
     ### 判断是否为赋值函数
     _, status = assign(cmd_token, variable)
@@ -77,7 +62,7 @@ def execute(cmd_token):
     ### 若为内置命令则直接执行
     elif cmd_name in builtin_commands :
         return builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
-                                          external_commands=external_commands, aliased_cmd=aliased_cmd)
+                                          external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids)
     
     ### 根据别名执行命令
     elif cmd_name in aliased_cmd :
@@ -118,11 +103,11 @@ def shell_loop():
         '''### 读取输入命令
         input_cmd = readline_input()'''
 
-        ### 保存命令历史
-        save_history(cmd_token)
-
         ### 切分命令
         cmd_token = tokenize(input_cmd)
+
+        ### 保存命令历史
+        save_history(cmd_token)
 
         ### 测试
         print('executing command:', cmd_token)
@@ -167,6 +152,14 @@ def register_external_command(builtin_commands, external_commands):
     return external_commands
 
 
+### 获取所有进程pid
+def pids_register(pids):
+    processes = psutil.process_iter(['pid', 'name'])
+    for p in processes:
+        pids[p.info['pid']] = p.info['name']
+    return pids
+
+
 ### 注册函数库
 def init():
     register_builtin_commands("cd", cd)
@@ -179,7 +172,23 @@ def init():
     register_builtin_commands("type", type)
     register_builtin_commands("export", export)
     register_builtin_commands("unset", unset)
+    register_builtin_commands("kill", kill)
     register_external_command(builtin_commands, external_commands)
+
+### 信号处理
+pids_register()
+
+def sigint(signal, frame):
+    print('')
+    sys.exit(0)
+signal.signal(signal.SIGINT, sigint)
+
+def sigterm(signal ,frame):
+    for p in pids.keys():
+        if p != 0:
+            os.kill(p, 15)
+    sys.exit(0)
+signal.signal(signal.SIGTERM, sigterm)
 
 
 def main():
