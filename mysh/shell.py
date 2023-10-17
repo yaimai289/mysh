@@ -8,6 +8,7 @@ import socket
 import getpass
 import signal
 import psutil
+from io import StringIO
 
 
 ### 设置环境变量
@@ -23,22 +24,55 @@ HISTORY_FILE = os.path.expanduser('~/mysh_history')
 with open(HISTORY_FILE, "a") as f:
     pass
 
-### 创建字典
+### 创建字典与函数
 builtin_commands = {}
 external_commands = []
 aliased_cmd = {}
 variable = {}
 pids ={}
+redirects = []
+
+### 设置标准输出流和标准输出错误流
+old_out= sys.stdout
+old_err=sys.stderr
+old_in =sys.stdin
+
+out_stream = sys.stdout
+err_stream = sys.stderr
+in_stream = sys.stdin
 
 ### 分割参数
 def tokenize(string):
     return shlex.split(string)
 
-
 def execute(cmd_token):
 
     ### 测试
     print(f'cmd_token: {cmd_token}')
+
+    global out_stream, err_stream
+
+    ### 重定向
+    n = None
+
+    for redirect_index in range(0, len(cmd_token)):
+        if cmd_token[redirect_index] in redirects:
+            redi_sym = cmd_token[redirect_index]
+            n = redirect_index
+            if n == 0 or n == len(cmd_token) - 1:
+                print('\033[31mNo redirect object\033[0m')
+                n = None
+                break
+    if n:
+        if redi_sym == '>':
+            cmd_target = os.path.expanduser(cmd_token[-1])
+            cmd_token = cmd_token[0:n]
+            with open(cmd_target) as f:
+                subprocess.run(cmd_token)
+            '''with open(cmd_target, "w") as f:
+                os.dup2(f.fileno(), 1)
+                ###return os.system(cmd_token)
+            return execute(cmd_token)'''
 
     ### 获取所有进程pid
     pids = pids_register()
@@ -62,25 +96,36 @@ def execute(cmd_token):
     ### 执行后台命令
     elif cmd_token[-1] == '&':
         if len(cmd_token) != 1:
-            cmd = ' '.join(cmd_token)
+            cmd = ' '.join(cmd_token)[:-1]
+            #proc = subprocess.Popen(['/bin/python3', '/home/yw/mysh/mysh/shell.py', '&', cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            print(stdout)
+            if stdout:
+                print(stdout)
             if proc.returncode != 0:
                 print(f'\033[31mError in background process: \033[33m{stderr}\033[0m')
+            else:
+                print("yes")
         else:
             return
 
-    ### 若为内置命令则直接执行
-    elif cmd_name in builtin_commands :
-        return builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
-                                          external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids)
-    
+
     ### 根据别名执行命令
-    elif cmd_name in aliased_cmd :
+    elif cmd_name in aliased_cmd:
         alias_cmd = tokenize(aliased_cmd[cmd_name])
         alias_cmd_token = alias_cmd + cmd_args
         return execute(alias_cmd_token)
+
+    ### 若为内置命令则直接执行
+    elif cmd_name in builtin_commands :
+        '''print(f'builtin_commands: {builtin_commands}')
+        process = subprocess.run(f'builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
+               external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids, out = out, err =err)', text=True)
+        if process.returncode == 0:
+            print('yes')'''
+        return subprocess.run(builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
+               external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids, out_stream = out_stream, 
+               err_stream =err_stream, in_stream = in_stream))
 
     ### 若为外部命令
     else :
@@ -98,6 +143,12 @@ def execute(cmd_token):
             print(f"\033[31mCommand not found: {cmd_name}\033[0m")
         except Exception as e:
             print(f"\033[31mError in executing: {e}[0m")
+
+        ### 恢复流
+        sys.stdout = old_out
+        sys.stderr = old_err
+        sys.stdin = old_in
+
     return SHELL_STATUS_RUN
 
 
@@ -131,16 +182,21 @@ def shell_loop():
             print('command args:',cmd_token[1:])
 
             ### 缓冲
-            time.sleep(0.01)
+            time.sleep(0.5)
 
             ### 执行命令并获取新状态
             status = execute(cmd_token)
 
+            ### 恢复输出流
+            sys.stdout = old_out
+            sys.stderr = old_err
+            sys.stdin = old_in
+
+            ### 缓冲
+            time.sleep(0.5)
+
         else:
             status = SHELL_STATUS_RUN
-
-        ### 缓冲
-        time.sleep(0.01)
 
         ### 检查是否为停止状态
         if status == SHELL_STATUS_STOP:
@@ -203,8 +259,11 @@ def init():
 ### 信号处理
 pids_register()
 
+### 注册重定向符号
+redirects = ["<", ">", '2>', '>>', '|']
+
 def sigint(signal, frame):
-    print('\033[33m\033[Process interrupted\033[0m')
+    print('\033[33m\nProcess interrupted\033[0m')
     sys.exit(0)
 signal.signal(signal.SIGINT, sigint)
 
