@@ -50,29 +50,8 @@ def execute(cmd_token):
     ### 测试
     print(f'cmd_token: {cmd_token}')
 
-    global out_stream, err_stream
-
     ### 重定向
-    n = None
-
-    for redirect_index in range(0, len(cmd_token)):
-        if cmd_token[redirect_index] in redirects:
-            redi_sym = cmd_token[redirect_index]
-            n = redirect_index
-            if n == 0 or n == len(cmd_token) - 1:
-                print('\033[31mNo redirect object\033[0m')
-                n = None
-                break
-    if n:
-        if redi_sym == '>':
-            cmd_target = os.path.expanduser(cmd_token[-1])
-            cmd_token = cmd_token[0:n]
-            with open(cmd_target) as f:
-                subprocess.run(cmd_token)
-            '''with open(cmd_target, "w") as f:
-                os.dup2(f.fileno(), 1)
-                ###return os.system(cmd_token)
-            return execute(cmd_token)'''
+    out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
 
     ### 获取所有进程pid
     pids = pids_register()
@@ -118,25 +97,32 @@ def execute(cmd_token):
 
     ### 若为内置命令则直接执行
     elif cmd_name in builtin_commands :
-        '''print(f'builtin_commands: {builtin_commands}')
-        process = subprocess.run(f'builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
-               external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids, out = out, err =err)', text=True)
-        if process.returncode == 0:
-            print('yes')'''
-        return subprocess.run(builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
+        return builtin_commands[cmd_name](cmd_args, variable=variable, builtin_commands=builtin_commands, 
                external_commands=external_commands, aliased_cmd=aliased_cmd, pids=pids, out_stream = out_stream, 
-               err_stream =err_stream, in_stream = in_stream))
+               err_stream =err_stream, in_stream = in_stream)
 
     ### 若为外部命令
     else :
         try:
-            result = subprocess.run(cmd_token, capture_output=True, text=True)
-            ### 若有标准输出
-            if result.stdout:
-                print(result.stdout)
-            ### 若有标准错误输出
-            if result.stderr:
-                print(result.stderr)
+            if '|' in cmd_token:
+                commands = ''.join(cmd_token).split('|')
+                for c in commands:
+                    input_data = None
+                    result = subprocess.run(cmd_token, capture_output=True, text=True,input=input_data)
+                    if result.stdout:
+                        input_data = result.stdout
+            else:
+                result = subprocess.run(cmd_token, capture_output=True, text=True)
+                ### 若有标准输出
+                if result.stdout and out_stream == sys.stdout:
+                    print(result.stdout)
+                elif out_stream != sys.stdout:
+                    out_stream.write(result.stdout)
+                ### 若有标准错误输出
+                if result.stderr and err_stream ==sys.stderr:
+                    print(result.stderr)
+                elif err_stream != sys.stderr:
+                    err_stream.write(result.stderr)
 
         ### 错误反馈
         except FileNotFoundError:
@@ -281,7 +267,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-    ### 光标移动, 换行， 进度条, 声音, 永久别名, 函数赋值
