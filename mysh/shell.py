@@ -58,6 +58,21 @@ def execute(cmd_token):
     ### 重定向
     cmd_token, out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
 
+    ### 初始化管道
+    with open(os.path.expanduser('~/Pipe'), 'w') as f:
+        f.truncate(0)
+
+    ### 管道符
+    if '|' in cmd_token:
+        cmd_token = ' '.join(cmd_token).split('|')
+        print(f'111: {cmd_token}')
+        out_stream = open(os.path.expanduser('~/Pipe'), 'w')
+        in_stream = sys.__stdin__
+        for c in cmd_token:
+            execute(tokenize(c))
+            in_stream = open(os.path.expanduser('~/Pipe'), 'r')
+
+
     ### 判断是否为赋值函数
     _, status = assign(cmd_token, variable, out_stream=out_stream, err_stream=err_stream, in_stream=in_stream)
 
@@ -105,9 +120,9 @@ def execute(cmd_token):
                 commands = ''.join(cmd_token).split('|')
                 for c in commands:
                     input_data = None
-                    result = subprocess.run(cmd_token, capture_output=True, text=True,input=input_data)
-                    if result.stdout:
-                        input_data = result.stdout
+                    result = subprocess.run(c, capture_output=True, text=True,stdout=open(os.path.expanduser('~/Pipe'), 'w')
+                                            ,input=open(os.path.expanduser('~/Pipe'), 'r'))
+
             else:
                 result = subprocess.run(cmd_token, capture_output=True, text=True)
 
@@ -128,11 +143,6 @@ def execute(cmd_token):
             print(f"\033[31mCommand not found: {cmd_name}\033[0m")
         except Exception as e:
             print(f"\033[31mError in executing: {e}[0m")
-
-        ### 恢复流
-        sys.stdout = sys.__stdout__
-        sys.stderr = sys.__stderr__
-        sys.stdin = sys.stdin
 
     return SHELL_STATUS_RUN
 
@@ -245,7 +255,7 @@ def init():
 pids_register()
 
 ### 注册重定向符号
-redirects = ["<", ">", '2>', '>>', '|']
+redirects = ["<", ">", '2>', '>>']
 
 def sigint(signal, frame):
     print('\033[33m\nProcess interrupted\033[0m')
