@@ -2,8 +2,12 @@ import os
 import sys
 from mysh.constants import *
 from mysh.shell import builtin_commands
+from mysh.builtin.redirect import get_stream
 
-def which(args, **kw):
+
+def which(args, **kws):
+    ### 获取流
+    out_stream, err_stream, in_stream = get_stream(**kws)
 
     command = str(args[0])
     ### 创建路径列表
@@ -28,9 +32,9 @@ def which(args, **kw):
 
     # 若路径列表不为空
     if result:
-        print(''.join(result))
+        print(''.join(result), file= out_stream)
     # 若路径列表为空
     else:
-        print(f"\033[31mCommand: \033[36m{command[0]} \033[31mnot found in PATH or no access to\033[0m")
+        print(f"\033[31mCommand: \033[36m{command[0]} \033[31mnot found in PATH or no access to\033[0m", file= err_stream)
 
     return SHELL_STATUS_RUN

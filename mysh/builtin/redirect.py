@@ -1,6 +1,5 @@
 import os
 import sys
-from functools import wraps
 
 
 def redirect(cmd_token, redirects, out_stream, err_stream, in_stream):
@@ -18,12 +17,13 @@ def redirect(cmd_token, redirects, out_stream, err_stream, in_stream):
     if n:
         cmd_target = os.path.expanduser(cmd_token[-1])
         cmd_token = cmd_token[0:n]
+        print(f'111: {cmd_token}, {cmd_target}')
 
         if redi_sym == '>' or '>>':
             ### 重定向到标准输出
             if redi_sym == '>':
                 out_stream = open(cmd_target, "w")
-            else:
+            elif redi_sym == '>>':
                 out_stream = open(cmd_target, "a")
 
         elif redi_sym == '2>':
@@ -37,8 +37,11 @@ def redirect(cmd_token, redirects, out_stream, err_stream, in_stream):
         elif redi_sym == '|':
             pass
 
+    return cmd_token, out_stream, err_stream, in_stream
+
+
+def get_stream(**kws):
+    out_stream = kws.get('out_stream')
+    err_stream = kws.get('err_stream')
+    in_stream = kws.get('in_stream')
     return out_stream, err_stream, in_stream
-
-
-def redi_wrap(func):
-    

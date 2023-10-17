@@ -33,13 +33,10 @@ pids ={}
 redirects = []
 
 ### 设置标准输出流和标准输出错误流
-old_out= sys.stdout
-old_err=sys.stderr
-old_in =sys.stdin
+out_stream= sys.stdout
+err_stream=sys.stderr
+in_stream =sys.stdin
 
-out_stream = sys.stdout
-err_stream = sys.stderr
-in_stream = sys.stdin
 
 ### 分割参数
 def tokenize(string):
@@ -50,18 +47,23 @@ def execute(cmd_token):
     ### 测试
     print(f'cmd_token: {cmd_token}')
 
-    ### 重定向
-    out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
+    ### 设置标准输出流和标准输出错误流
+    out_stream= sys.stdout
+    err_stream=sys.stderr
+    in_stream =sys.stdin
 
     ### 获取所有进程pid
     pids = pids_register()
 
+    ### 重定向
+    cmd_token, out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
+
     ### 判断是否为赋值函数
-    _, status = assign(cmd_token, variable)
+    _, status = assign(cmd_token, variable, out_stream=out_stream, err_stream=err_stream, in_stream=in_stream)
 
     ### 判断是否存在变量引用
     if status != SHELL_STATUS_RUN:
-        cmd_token, status = var_ref(cmd_token, variable)
+        cmd_token, status = var_ref(cmd_token, variable, out_stream=out_stream, err_stream=err_stream, in_stream=in_stream)
 
     ### 拆分命令名与参数
     cmd_name = cmd_token[0]
@@ -78,13 +80,8 @@ def execute(cmd_token):
             cmd = ' '.join(cmd_token)[:-1]
             #proc = subprocess.Popen(['/bin/python3', '/home/yw/mysh/mysh/shell.py', '&', cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            if stdout:
-                print(stdout)
             if proc.returncode != 0:
-                print(f'\033[31mError in background process: \033[33m{stderr}\033[0m')
-            else:
-                print("yes")
+                print(f'\033[31mError in background process: \033[33m{proc.stderr}\033[0m')
         else:
             return
 
@@ -113,11 +110,13 @@ def execute(cmd_token):
                         input_data = result.stdout
             else:
                 result = subprocess.run(cmd_token, capture_output=True, text=True)
+
                 ### 若有标准输出
                 if result.stdout and out_stream == sys.stdout:
                     print(result.stdout)
                 elif out_stream != sys.stdout:
                     out_stream.write(result.stdout)
+
                 ### 若有标准错误输出
                 if result.stderr and err_stream ==sys.stderr:
                     print(result.stderr)
@@ -131,9 +130,9 @@ def execute(cmd_token):
             print(f"\033[31mError in executing: {e}[0m")
 
         ### 恢复流
-        sys.stdout = old_out
-        sys.stderr = old_err
-        sys.stdin = old_in
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+        sys.stdin = sys.stdin
 
     return SHELL_STATUS_RUN
 
@@ -173,10 +172,10 @@ def shell_loop():
             ### 执行命令并获取新状态
             status = execute(cmd_token)
 
-            ### 恢复输出流
-            sys.stdout = old_out
-            sys.stderr = old_err
-            sys.stdin = old_in
+            ### 恢复流
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+            sys.stdin = sys.stdin
 
             ### 缓冲
             time.sleep(0.5)

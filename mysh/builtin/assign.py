@@ -1,7 +1,11 @@
 from mysh.constants import *
+from mysh.builtin.redirect import get_stream
 
 
-def assign(cmd_token, variable):
+def assign(cmd_token, variable, **kws):
+    ### 获取流
+    out_stream, err_stream, in_stream = get_stream(**kws)
+
     ### 初始化状态
     new_status = None
 

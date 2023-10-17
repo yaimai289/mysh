@@ -1,11 +1,15 @@
 import os
 from mysh.constants import *
+from mysh.builtin.redirect import get_stream
 
 
-def pwd(args, **kw):
+def pwd(args, **kws):
+    ### 获取流
+    out_stream, err_stream, in_stream = get_stream(**kws)
+
     ### 打印目录
     try:
-        print(f'{os.getcwd()}\033')
+        print(f'{os.getcwd()}\033', file= out_stream)
 
     ### 错误反馈
     except Exception as e:
