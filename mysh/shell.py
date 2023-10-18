@@ -33,9 +33,9 @@ pids ={}
 redirects = []
 
 ### 设置标准输出流和标准输出错误流
-out_stream= sys.stdout
-err_stream=sys.stderr
-in_stream =sys.stdin
+out_stream=sys.__stdout__
+err_stream=sys.__stderr__
+in_stream =sys.__stdin__
 
 
 ### 分割参数
@@ -65,7 +65,6 @@ def execute(cmd_token):
     ### 管道符
     if '|' in cmd_token:
         cmd_token = ' '.join(cmd_token).split('|')
-        print(f'111: {cmd_token}')
         out_stream = open(os.path.expanduser('~/Pipe'), 'w')
         in_stream = sys.__stdin__
         for c in cmd_token:
@@ -83,8 +82,6 @@ def execute(cmd_token):
     ### 拆分命令名与参数
     cmd_name = cmd_token[0]
     cmd_args = cmd_token[1:]
-
-    print(f'status: {status}')
 
     if status == SHELL_STATUS_RUN:
         pass
@@ -151,47 +148,32 @@ def shell_loop():
     while True:
 
         ### 显示命令提示符
-        sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}'
-                         f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
-        sys.stdout.flush()
+        #sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}'
+        #                 f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
+        #sys.stdout.flush()
 
         pids_register()
 
         ### 读取输入命令
-        input_cmd = sys.stdin.readline()
-
-        '''### 读取输入命令
-        input_cmd = readline_input()'''
+        #input_cmd = input()
+        input_cmd = readline_input()
+        print(f'input: {input_cmd}')
 
         ### 切分命令
         cmd_token = tokenize(input_cmd)
 
-        ### 判断是否输入为空值
-        if cmd_token:
 
-            ### 保存命令历史
-            save_history(cmd_token)
+        ### 测试
+        print('executing command:', cmd_token)
+        print('command args:',cmd_token[1:])
 
-            ### 测试
-            print('executing command:', cmd_token)
-            print('command args:',cmd_token[1:])
+        ### 执行命令并获取新状态
+        status = execute(cmd_token)
 
-            ### 缓冲
-            time.sleep(0.5)
-
-            ### 执行命令并获取新状态
-            status = execute(cmd_token)
-
-            ### 恢复流
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
-            sys.stdin = sys.stdin
-
-            ### 缓冲
-            time.sleep(0.5)
-
-        else:
-            status = SHELL_STATUS_RUN
+        ### 恢复流
+        sys.stdout = sys.__stdout__
+        sys.stderr = sys.__stderr__
+        sys.stdin = sys.stdin
 
         ### 检查是否为停止状态
         if status == SHELL_STATUS_STOP:

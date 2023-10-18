@@ -13,4 +13,5 @@ from mysh.builtin.assign import assign
 from mysh.builtin.var_ref import var_ref
 from mysh.builtin.kill import kill
 from mysh.builtin.redirect import redirect
-### from mysh.builtin.readline_input import readline_input
+from mysh.builtin.readline_input import readline_input
+# from mysh.builtin.mysh_input import mysh_input

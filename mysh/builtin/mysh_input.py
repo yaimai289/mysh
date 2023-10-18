@@ -7,13 +7,7 @@ import tty
 from mysh.builtin.solve_home_dir import solve_home_dir
 from mysh.shell import HISTORY_FILE
 
-def tab_complete(user_input, complete_index, builtin_commands, external_commands):
-    options = list(builtin_commands.keys()) + external_commands
-    matches = [opt for opt in options if opt.startswith(user_input)]
-    if complete_index < len(matches):
-        return matches[complete_index]
-    else:
-        return None
+
 
 def get_history():
     with open(HISTORY_FILE ,'r') as f:
@@ -59,6 +53,7 @@ def mysh_input(builtin_commands, external_commands):
              f'{getpass.getuser()}@{socket.gethostname()}\033[0;0m:'\
              f'\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m'
     user_input = ''
+    print(prompt + user_input + '\r')
     lines = get_history()
     complete_index = 0
     history_index = len(lines) - 1
