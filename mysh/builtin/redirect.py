@@ -43,15 +43,3 @@ def get_stream(**kws):
     err_stream = kws.get('err_stream')
     in_stream = kws.get('in_stream')
     return out_stream, err_stream, in_stream
-
-
-def pipe(cmd_token, redirects, out_stream, err_stream, in_stream):
-    if '|' in cmd_token:
-        cmd_token = ''.join(cmd_token).split('|')
-        with open(os.path.expanduser('~/Pipe'), 'w') as f:
-            f.truncate(0)
-        out_stream = open(os.path.expanduser('~/Pipe'), 'w')
-        in_stream = sys.__stdin__
-        for c in cmd_token:
-            c = tokenize(c)
-            
