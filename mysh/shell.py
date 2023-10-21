@@ -38,9 +38,8 @@ in_stream =sys.__stdin__
 def tokenize(string):
     return shlex.split(string)
 
-
 def execute(cmd_token):
-
+    
     # 测试
     print(f'cmd_token: {cmd_token}')
 
@@ -56,18 +55,32 @@ def execute(cmd_token):
     cmd_token, out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
 
     # 初始化管道
-    with open(os.path.expanduser('~/Pipe'), 'w') as f:
+    with open(os.path.expanduser('~/mysh_Pipe'), 'w') as f:
         pass
 
     ### 管道符
     if '|' in cmd_token:
         cmd_token = ' '.join(cmd_token).split('|')
-        out_stream = open(os.path.expanduser('~/Pipe'), 'w')
         in_stream = sys.__stdin__
+        print('1')
         for c in cmd_token:
-            execute(tokenize(c))
-            in_stream = open(os.path.expanduser('~/Pipe'), 'r')
+            with open(os.path.expanduser('~/mysh_Pipe'), 'w') as pipe_file:
+                print('2')
+                execute_streams(tokenize(c), out_stream=pipe_file, err_stream=err_stream, in_stream=in_stream)
+                print('3')
+            in_stream.close()
+            in_stream = open(os.path.expanduser('~/mysh_Pipe'), 'r')
+            print(f'in_stream: {in_stream}')
+    else:
+        return execute_streams(cmd_token, out_stream=out_stream ,err_stream=err_stream, in_stream=in_stream)
+    
+    return SHELL_STATUS_RUN
 
+
+
+
+def execute_streams(cmd_token, *, out_stream, err_stream, in_stream):
+    print('4')
 
     # 判断是否为赋值函数
     _, status = assign(cmd_token, variable, out_stream=out_stream, err_stream=err_stream, in_stream=in_stream)
@@ -109,26 +122,19 @@ def execute(cmd_token):
     ### 若为外部命令
     else :
         try:
-            if '|' in cmd_token:
-                commands = ''.join(cmd_token).split('|')
-                for c in commands:
-                    result = subprocess.run(c, capture_output=True, text=True,stdout=open(os.path.expanduser('~/Pipe'), 'w')
-                                            ,input=open(os.path.expanduser('~/Pipe'), 'r'))
+            result = subprocess.run(cmd_token, capture_output=True, text=True)
 
-            else:
-                result = subprocess.run(cmd_token, capture_output=True, text=True)
+            ### 若有标准输出
+            if result.stdout and out_stream == sys.stdout:
+                print(result.stdout)
+            elif out_stream != sys.stdout:
+                out_stream.write(result.stdout)
 
-                ### 若有标准输出
-                if result.stdout and out_stream == sys.stdout:
-                    print(result.stdout)
-                elif out_stream != sys.stdout:
-                    out_stream.write(result.stdout)
-
-                ### 若有标准错误输出
-                if result.stderr and err_stream ==sys.stderr:
-                    print(result.stderr)
-                elif err_stream != sys.stderr:
-                    err_stream.write(result.stderr)
+            ### 若有标准错误输出
+            if result.stderr and err_stream ==sys.stderr:
+                print(result.stderr)
+            elif err_stream != sys.stderr:
+                err_stream.write(result.stderr)
 
         ### 错误反馈
         except FileNotFoundError:
