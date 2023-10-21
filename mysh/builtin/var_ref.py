@@ -3,13 +3,13 @@ from mysh.builtin.redirect import get_stream
 
 
 def var_ref(cmd_token, variable, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
-    ### 初始化状态
+    # 初始化状态
     new_status = None
 
-    ### 遍历命令列表
+    # 遍历命令列表
     for i in range(0, len(cmd_token)):
         string = cmd_token[i]
         ### 若出现引用符号，存在变量则替换，不存在则报错

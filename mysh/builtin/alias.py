@@ -3,7 +3,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def alias(args, *, aliased_cmd, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     if not args:

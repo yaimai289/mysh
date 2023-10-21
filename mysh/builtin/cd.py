@@ -4,7 +4,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def cd(args, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     path = args[0] if len(args) > 0 else "~"   ### 若无参数默认参数为~

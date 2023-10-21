@@ -3,7 +3,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def history(args, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     try:
@@ -11,7 +11,7 @@ def history(args, **kws):
         with open(HISTORY_FILE, "r") as f:
             lines = f.readlines()
         history_num = len(lines)
-        load_num = int(args)[0] if len(args) > 0 else history_num   ### 加载命令历史默认为全部
+        load_num = int(args)[0] if len(args) > 0 else history_num   # 加载命令历史默认为全部
 
         ### 若无命令历史记录
         if history_num == 2:
@@ -21,7 +21,7 @@ def history(args, **kws):
         elif load_num > history_num:
             print(f"\033[31mNot enough command history\nAmount of command history : \033[32m{len(lines)}\033[0m", file= err_stream)
 
-         ### 若无异常打印命令
+        ### 若无异常打印命令
         else:
             first_command = history_num - load_num + 1
             last_command = history_num - 1
@@ -31,23 +31,3 @@ def history(args, **kws):
                 print(f"{i}. {l}", file= out_stream)
     except Exception as e:
         print(f'\033[31mError in history: \033[32m{e}\033[0m', file= err_stream)
-
-
-def save_history(cmd_token):
-    cmd_str = ''.join(cmd_token)
-
-    ### 获取历史命令列表
-    with open(HISTORY_FILE, "r") as f:
-        lines = f.readlines()
-
-    ### 若历史命令数未超过最大值100
-    if len(lines) < 100:
-        first_command = 0
-    ### 若历史命令数超过最大值
-    else:
-        first_command = 1
-    new_lines = lines[first_command:] + [cmd_str+'\n'] if len(lines) != 0 else [cmd_str]
-
-    ### 写入新历史记录
-    with open(HISTORY_FILE, "w") as f:
-        f.write("".join(new_lines))

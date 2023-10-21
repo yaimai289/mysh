@@ -4,7 +4,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def export(args, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     ### 参数错误，提供帮助信息

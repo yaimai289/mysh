@@ -3,7 +3,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def unset(args, *, variable, aliased_cmd, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     ### 判断格式是否正确

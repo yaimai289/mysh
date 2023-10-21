@@ -1,28 +1,24 @@
 import os
 import sys
 import shlex
-import readline
 import subprocess
 import time
-import socket
-import getpass
 import signal
 import psutil
-from io import StringIO
 
 
-### 设置环境变量
+# 设置环境变量
 sys.path.append('/home/yw/mysh')
 
 
-from mysh.constants import *   ### 导入常量
-from mysh.builtin import *   ### 导入内置函数
+from mysh.constants import *   # 导入常量
+from mysh.builtin import *   # 导入内置函数
 
 
 ### 设置路径并创建历史记录文件
 HISTORY_FILE = os.path.expanduser('~/mysh_history')
-with open(HISTORY_FILE, "a") as f:
-    pass
+open(HISTORY_FILE, "a").close()
+
 
 ### 创建字典与函数
 builtin_commands = {}
@@ -38,13 +34,14 @@ err_stream=sys.__stderr__
 in_stream =sys.__stdin__
 
 
-### 分割参数
+# 分割参数
 def tokenize(string):
     return shlex.split(string)
 
+
 def execute(cmd_token):
 
-    ### 测试
+    # 测试
     print(f'cmd_token: {cmd_token}')
 
     ### 设置标准输出流和标准输出错误流
@@ -52,15 +49,15 @@ def execute(cmd_token):
     err_stream=sys.stderr
     in_stream =sys.stdin
 
-    ### 获取所有进程pid
+    # 获取所有进程pid
     pids = pids_register()
 
-    ### 重定向
+    # 重定向
     cmd_token, out_stream, err_stream, in_stream = redirect(cmd_token, redirects, out_stream, err_stream, in_stream)
 
-    ### 初始化管道
+    # 初始化管道
     with open(os.path.expanduser('~/Pipe'), 'w') as f:
-        f.truncate(0)
+        pass
 
     ### 管道符
     if '|' in cmd_token:
@@ -72,7 +69,7 @@ def execute(cmd_token):
             in_stream = open(os.path.expanduser('~/Pipe'), 'r')
 
 
-    ### 判断是否为赋值函数
+    # 判断是否为赋值函数
     _, status = assign(cmd_token, variable, out_stream=out_stream, err_stream=err_stream, in_stream=in_stream)
 
     ### 判断是否存在变量引用
@@ -90,7 +87,6 @@ def execute(cmd_token):
     elif cmd_token[-1] == '&':
         if len(cmd_token) != 1:
             cmd = ' '.join(cmd_token)[:-1]
-            #proc = subprocess.Popen(['/bin/python3', '/home/yw/mysh/mysh/shell.py', '&', cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if proc.returncode != 0:
                 print(f'\033[31mError in background process: \033[33m{proc.stderr}\033[0m')
@@ -116,7 +112,6 @@ def execute(cmd_token):
             if '|' in cmd_token:
                 commands = ''.join(cmd_token).split('|')
                 for c in commands:
-                    input_data = None
                     result = subprocess.run(c, capture_output=True, text=True,stdout=open(os.path.expanduser('~/Pipe'), 'w')
                                             ,input=open(os.path.expanduser('~/Pipe'), 'r'))
 
@@ -147,33 +142,21 @@ def execute(cmd_token):
 def shell_loop():
     while True:
 
-        ### 显示命令提示符
-        #sys.stdout.write(f'\033[1;31m>\033[1;33m>\033[1;34m> \033[0;32m{getpass.getuser()}@{socket.gethostname()}'
-        #                 f'\033[0;0m:\033[1;34m{solve_home_dir(os.getcwd())} \033[0;0m')
-        #sys.stdout.flush()
-
         pids_register()
 
-        ### 读取输入命令
-        #input_cmd = input()
+        # 读取输入命令
         input_cmd = readline_input()
-        print(f'input: {input_cmd}')
 
-        ### 切分命令
+        # 切分命令
         cmd_token = tokenize(input_cmd)
 
-
-        ### 测试
-        print('executing command:', cmd_token)
-        print('command args:',cmd_token[1:])
-
-        ### 执行命令并获取新状态
+        # 执行命令并获取新状态
         status = execute(cmd_token)
 
         ### 恢复流
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
-        sys.stdin = sys.stdin
+        sys.stdin = sys.__stdin__
 
         ### 检查是否为停止状态
         if status == SHELL_STATUS_STOP:
@@ -186,8 +169,9 @@ def register_builtin_commands(name, func):
 
 def get_all_commands():
     all_commands = []
-    ### 设置查找路径
+    # 设置查找路径
     sys_path = [f'{sys.prefix}/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin']
+
     for path in sys_path:
         try:
             ### 遍历路径判断是否为非空名文件
@@ -198,6 +182,7 @@ def get_all_commands():
         except FileNotFoundError:
             continue
     return all_commands
+
 
 def register_external_command(builtin_commands, external_commands):
     all_commands = get_all_commands()
@@ -233,11 +218,12 @@ def init():
     register_builtin_commands("kill", kill)
     register_external_command(builtin_commands, external_commands)
 
-### 信号处理
-pids_register()
 
 ### 注册重定向符号
 redirects = ["<", ">", '2>', '>>']
+
+### 信号处理
+pids_register()
 
 def sigint(signal, frame):
     print('\033[33m\nProcess interrupted\033[0m')

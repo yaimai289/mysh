@@ -6,14 +6,15 @@ from mysh.builtin.redirect import get_stream
 
 
 def which(args, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     command = str(args[0])
-    ### 创建路径列表
+
+    # 创建路径列表
     result = []
 
-    ### 若为自建函数
+    # 若为自建函数
     if command in builtin_commands:
         result.append(f'/home/yw/mysh/mysh/builtin/{command}')
 

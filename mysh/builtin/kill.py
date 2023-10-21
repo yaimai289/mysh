@@ -4,12 +4,12 @@ import time
 from mysh.builtin.redirect import get_stream
 
 
-### 获取信号字典
+# 获取信号字典
 signals = {name.value: name.name for name in signal.Signals}
 
 
 def kill(args, *, pids, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     ### 参数不合规范
@@ -19,7 +19,6 @@ def kill(args, *, pids, **kws):
 
     ### 无参数默认终止主程序
     elif len(args) == 0:
-        time.sleep(0.5)
         char = input(f'\033[31mYou are killing main process, press (Y/n) to confirm: \033[0m', file= err_stream)
         ### 确认
         if char == 'Y' or 'y':
@@ -35,7 +34,7 @@ def kill(args, *, pids, **kws):
 
     ### 单参数
     elif len(args) == 1:
-        ### 默认进程为当前进程
+        ###默认进程为当前进程
         arg = args[0]
         if str(arg).startswith('-') and arg[1:] in signals.keys():
             os.kill(os.getpid(), signals[arg[1:]])

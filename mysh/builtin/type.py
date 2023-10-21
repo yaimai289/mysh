@@ -3,7 +3,7 @@ from mysh.builtin.redirect import get_stream
 
 
 def type(args, *, builtin_commands, external_commands, **kws):
-    ### 获取流
+    # 获取流
     out_stream, err_stream, in_stream = get_stream(**kws)
 
     ### 参数不符合格式

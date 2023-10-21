@@ -4,7 +4,7 @@ from mysh.shell import tokenize
 
 
 def redirect(cmd_token, redirects, out_stream, err_stream, in_stream):
-    ### 重定向
+    # 重定向
     n = None
 
     for redirect_index in range(0, len(cmd_token)):
