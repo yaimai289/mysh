@@ -1,3 +1,5 @@
+### 这个是废案，自己想从比较底层来实现输入相关功能
+
 import os
 import sys
 import getpass
