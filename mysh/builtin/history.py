@@ -31,3 +31,23 @@ def history(args, **kws):
                 print(f"{i}. {l}", file= out_stream)
     except Exception as e:
         print(f'\033[31mError in history: \033[32m{e}\033[0m', file= err_stream)
+
+### 也是一个废案，没调用readline
+def save_history(cmd_token):
+    cmd_str = ''.join(cmd_token)
+
+    ### 获取历史命令列表
+    with open(HISTORY_FILE, "r") as f:
+        lines = f.readlines()
+
+    ### 若历史命令数未超过最大值100
+    if len(lines) < 100:
+        first_command = 0
+    ### 若历史命令数超过最大值
+    else:
+        first_command = 1
+    new_lines = lines[first_command:] + [cmd_str+'\n'] if len(lines) != 0 else [cmd_str]
+
+    ### 写入新历史记录
+    with open(HISTORY_FILE, "w") as f:
+        f.write("".join(new_lines))
