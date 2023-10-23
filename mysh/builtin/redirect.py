@@ -1,5 +1,4 @@
 import os
-import sys
 from mysh.shell import tokenize
 
 
