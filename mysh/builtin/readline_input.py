@@ -49,15 +49,17 @@ def readline_input():
                 elif user_input == "\x1b[A": 
                     history_index -= 1 if history_index > 0 else history_index
                     user_input = readline.get_history_item(history_index)
+                            
                 # 下方向键
                 elif user_input == "\x1b[B": 
                     history_index += 1 if history_index < readline.get_history_length() else history_index
                     user_input = readline.get_history_item(history_index)
+                            
                 # 左右方向键
                 elif user_input == "\x1b[C" or user_input == "\x1b[D": 
                     continue
-
-            readline.add_history(user_input)
+                            
+            # 保存命令历史
             readline.write_history_file(HISTORY_FILE)
             break
 
