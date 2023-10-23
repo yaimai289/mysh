@@ -22,9 +22,9 @@ def redirect(cmd_token, redirects, out_stream, err_stream, in_stream):
         if redi_sym == '>' or '>>':
             ### 重定向到标准输出
             if redi_sym == '>':
-                out_stream = open(cmd_target, "w")
+                out_stream = open(cmd_target, "w") # 覆盖
             elif redi_sym == '>>':
-                out_stream = open(cmd_target, "a")
+                out_stream = open(cmd_target, "a") # 添加
 
         elif redi_sym == '2>':
             ### 重定向到标准错误输出
