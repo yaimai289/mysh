@@ -1,6 +1,9 @@
 # mysh
 
-## 这是一个用python编写的简易shell，具体功能如下
+## 这是一个用python编写的简易shell
+
+### 具体功能
+
 1. 实现了部分内置函数如cd,which等
 2. 实现对其他程序的调用
 3. 实现了对特殊符号"及'及-及~的解析
@@ -18,3 +21,15 @@
 15. 实现了IO重定向
 16. 初步实现了管道符
 17. 初步实现了export
+
+### 调用模块
+* os
+* sys
+* shlex
+* subprocess
+* time
+* signal
+* psutil
+* readline
+* getpass
+* socket
