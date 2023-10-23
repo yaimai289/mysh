@@ -32,7 +32,7 @@ def history(args, **kws):
     except Exception as e:
         print(f'\033[31mError in history: \033[32m{e}\033[0m', file= err_stream)
 
-### 也是一个废案，没调用readline
+### 也是一个废案，开始没调用readline实现存储历史的函数
 def save_history(cmd_token):
     cmd_str = ''.join(cmd_token)
 
